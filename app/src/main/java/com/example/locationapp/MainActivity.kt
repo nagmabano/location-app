@@ -3,7 +3,6 @@ package com.example.locationapp
 import android.content.Context
 import android.os.Bundle
 import android.Manifest
-import android.health.connect.datatypes.ExerciseRoute.Location
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -20,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.locationapp.ui.theme.LocationAppTheme
@@ -46,8 +44,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MyApp(viewModel: LocationViewModel) {
     val context = LocalContext.current
-    val LocationUtils = LocationUtils(context)
-    LocationDisplay(locationUtils = LocationUtils,viewModel, context = context)
+    val locationUtils = LocationUtils(context)
+    LocationDisplay(locationUtils = locationUtils,viewModel, context = context)
 }
 
 @Composable
@@ -55,6 +53,9 @@ fun LocationDisplay(locationUtils: LocationUtils,
                     viewModel: LocationViewModel,
                     context: Context) {
     val location = viewModel.location.value
+    val address = location?.let {
+        locationUtils.reverseGeocodeLocation(location = location)
+    }
     val requestPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
         onResult = {
@@ -89,7 +90,7 @@ fun LocationDisplay(locationUtils: LocationUtils,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center) {
         if (location != null) {
-            Text(text = "Address: ${location.latitude} ${location.longitude}" )
+            Text(text = "Address: ${location.latitude} ${location.longitude} \n $address" )
         } else {
             Text(text = "Location is not available")
         }
